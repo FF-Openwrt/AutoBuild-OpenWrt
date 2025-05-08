@@ -21,7 +21,7 @@ jobs:
           sudo -E apt-get remove -y --purge azure-cli ghc zulu* hhvm llvm* firefox google* dotnet* powershell mysql* php* mssql-tools msodbcsql17 android*
           sudo -E apt-get update -y
           sudo -E apt-get full-upgrade -y
-          sudo -E apt-get install -y ack antlr3 aria2 asciidoc autoconf automake autopoint binutils bison build-essential bzip2 ccache cmake cpio curl device-tree-compiler fastjar flex gawk gettext gcc-multilib g++-multilib git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libglib2.0-dev libgmp3-dev libltdl-dev libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev libreadline-dev libssl-dev libtool lrzsz mkisofs msmtp nano ninja-build p7zip p7zip-full patch pkgconf python2.7 python3 python3-pip libpython3-dev qemu-utils rsync scons squashfs-tools subversion swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev
+          sudo -E apt-get install -y ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential bzip2 ccache cmake cpio curl device-tree-compiler ecj fastjar flex gawk gettext gcc-multilib g++-multilib git gperf haveged help2man intltool lib32gcc1 libc6-dev-i386 libelf-dev libglib2.0-dev libgmp3-dev libltdl-dev  libmpc-dev libmpfr-dev libncurses5-dev libncursesw5 libncursesw5-dev libreadline-dev libssl-dev libtool lrzsz mkisofs msmtp nano ninja-build p7zip p7zip-full patch pkgconf python2.7 python3 python3-pip python3-ply python-docutils qemu-utils re2c rsync scons squashfs-tools subversion swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev
           for i in $(ls /usr/bin/*-8); do sudo -E ln -sf $i ${i%%-8*}; done
           sudo -E ln -sf /usr/include/asm-generic /usr/include/asm
           sudo -E apt-get autoremove -y --purge
@@ -34,7 +34,7 @@ jobs:
       - name: Clone Source
         run: |
           cd "/home/runner"
-          git clone --branch "openwrt-18.06-k5.4" --single-branch "https://github.com/immortalwrt/immortalwrt" "openwrt"
+          git clone --branch "openwrt-24.10" --single-branch "https://github.com/immortalwrt/immortalwrt" "openwrt"
           sudo chown -R runner:runner "openwrt"
           cd "/home/runner/openwrt"
           ./scripts/feeds update -a
@@ -43,20 +43,20 @@ jobs:
       - name: Build OpenWrt-18.06
         run: |
           cd "/home/runner/openwrt"
-          cp -f "${GITHUB_WORKSPACE}/Nanopi_R4S.config" ".config"
+          cp -f "${GITHUB_WORKSPACE}/OrangePi_R1_plus_lts.config" ".config"
           chmod +x ./customize.sh && ./customize.sh
           make defconfig
           make -j$[$(nproc)+1]
-          mv -f "bin/targets/rockchip/armv8/immortalwrt-rockchip-armv8-friendlyarm_nanopi-r4s-ext4-sysupgrade.img.gz" "../immortalwrt-18.06-rockchip-armv8-friendlyarm_nanopi-r4s-ext4-sysupgrade.img.gz"
-          mv -f "bin/targets/rockchip/armv8/immortalwrt-rockchip-armv8-friendlyarm_nanopi-r4s-squashfs-sysupgrade.img.gz" "../immortalwrt-18.06-rockchip-armv8-friendlyarm_nanopi-r4s-squashfs-sysupgrade.img.gz"
+          mv -f "bin/targets/rockchip/armv8/immortalwrt-rockchip-OrangePi_R1_plus_lts-ext4-sysupgrade.img.gz" "../immortalwrt-18.06-rockchip-OrangePi_R1_plus_lts-ext4-sysupgrade.img.gz"
+          mv -f "bin/targets/rockchip/armv8/immortalwrt-rockchip-OrangePi_R1_plus_lts-squashfs-sysupgrade.img.gz" "../immortalwrt-18.06-rockchip-OrangePi_R1_plus_lts-squashfs-sysupgrade.img.gz"
           mv -f "bin/targets/rockchip/armv8/sha256sums" "../immortalwrt-18.06-sha256sums"
       - name: Rebuild OpenWrt to Collect Error Log If Failed
         if: failure()
         run: |
           cd "/home/runner/openwrt"
           make -j1 V=s
-          mv -f "bin/targets/rockchip/armv8/immortalwrt-rockchip-armv8-friendlyarm_nanopi-r4s-ext4-sysupgrade.img.gz" "../immortalwrt-18.06-rockchip-armv8-friendlyarm_nanopi-r4s-ext4-sysupgrade.img.gz"
-          mv -f "bin/targets/rockchip/armv8/immortalwrt-rockchip-armv8-friendlyarm_nanopi-r4s-squashfs-sysupgrade.img.gz" "../immortalwrt-18.06-rockchip-armv8-friendlyarm_nanopi-r4s-squashfs-sysupgrade.img.gz"
+          mv -f "bin/targets/rockchip/armv8/immortalwrt-rockchip-OrangePi_R1_plus_lts-ext4-sysupgrade.img.gz" "../immortalwrt-18.06-rockchip-OrangePi_R1_plus_lts-ext4-sysupgrade.img.gz"
+          mv -f "bin/targets/rockchip/armv8/immortalwrt-rockchip-OrangePi_R1_plus_lts-squashfs-sysupgrade.img.gz" "../immortalwrt-18.06-rockchip-OrangePi_R1_plus_lts-squashfs-sysupgrade.img.gz"
           mv -f "bin/targets/rockchip/armv8/sha256sums" "../immortalwrt-18.06-sha256sums"
       - name: Upload OpenWrt-18.06 SHA256SUM Hash
         uses: actions/upload-artifact@master
@@ -66,13 +66,13 @@ jobs:
       - name: Upload OpenWrt-18.06 EXT4 Firmware
         uses: actions/upload-artifact@master
         with:
-          name: openwrt-18.06-rockchip-armv8-friendlyarm_nanopi-r4s-ext4-sysupgrade.img.gz
-          path: /home/runner/immortalwrt-18.06-rockchip-armv8-friendlyarm_nanopi-r4s-ext4-sysupgrade.img.gz
+          name: openwrt-18.06-rockchip-OrangePi_R1_plus_lts-ext4-sysupgrade.img.gz
+          path: /home/runner/immortalwrt-18.06-rockchip-OrangePi_R1_plus_lts-ext4-sysupgrade.img.gz
       - name: Upload OpenWrt-18.06 SquashFS Firmware
         uses: actions/upload-artifact@master
         with:
-          name: openwrt-18.06-rockchip-armv8-friendlyarm_nanopi-r4s-squashfs-sysupgrade.img.gz
-          path: /home/runner/immortalwrt-18.06-rockchip-armv8-friendlyarm_nanopi-r4s-squashfs-sysupgrade.img.gz
+          name: openwrt-18.06-rockchip-OrangePi_R1_plus_lts-squashfs-sysupgrade.img.gz
+          path: /home/runner/immortalwrt-18.06-rockchip-OrangePi_R1_plus_lts-squashfs-sysupgrade.img.gz
       - name: Upload OpenWrt-18.06 IPK Packages
         uses: actions/upload-artifact@master
         with:
